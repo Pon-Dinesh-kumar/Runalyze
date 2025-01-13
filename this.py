@@ -48,3 +48,5 @@ total = 0
 passed = 0
 failed = 0
 aborted = 0
+
+unclassified_errors = []

@@ -9,25 +9,7 @@ st.set_page_config(layout="wide")
 load_dotenv('access.env')
 st.title("Azure DevOps Test Run Analysis")
 cols = st.columns(8)
-unclassified_errors = []
 
-
-
-
-def custom_metric(label, value, color, font_size="16px"):
-    return f"""
-    <div style="border:2px solid {color}; border-radius:10px; padding:10px; margin:5px;">
-        <h2 style="color:{color}; font-size:{font_size}; margin:0; line-height:1.2; padding: 0;">{label}</h2>
-        <h1 style="color:{color}; font-size:calc({font_size} * 2); margin:0; line-height:1.2; padding: 0;">{value}</h1>
-    </div>
-    """
-
-def classify_error_message(error_message):
-    for class_label, keywords in this.class_keywords.items():
-        if any(keyword in error_message for keyword in keywords):
-            return class_label
-    unclassified_errors.append(error_message)
-    return "Unclassified"
 
 def initialize(run_id):
     #GETTING RUN RESULT
@@ -67,21 +49,46 @@ def initialize(run_id):
         (stat.get("count", 0) for stat in this.run_summary.get("runStatistics", []) if stat.get("outcome") == "None"), 0)
 
 
-def display_run_details(font_size='14px'):
 
+def custom_metric(label, value, color, font_size="16px"):
+    return f"""
+    <div style="border:2px solid {color}; border-radius:10px; padding:10px; margin:5px;">
+        <h2 style="color:{color}; font-size:{font_size}; margin:0; line-height:1.2; padding: 0;">{label}</h2>
+        <h1 style="color:{color}; font-size:calc({font_size} * 2); margin:0; line-height:1.2; padding: 0;">{value}</h1>
+    </div>
+    """
+
+def classify_error_message(error_message):
+    for class_label, keywords in this.class_keywords.items():
+        if any(keyword in error_message for keyword in keywords):
+            return class_label
+    this.unclassified_errors.append(error_message)
+    return "Unclassified"
+
+
+def display_run_details():
+    font_size = 14
 
     custom_css = f"""
     <style>
+        .metric-container {{
+            background-color: rgba(50, 50, 50, 0.7);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px; /* Added for some space between the boxes */
+        }}
         .metric-label {{
-            font-size: {font_size};
-            font-weight: bold;
+            font-size: {font_size}px;
+            font-weight: 200;
+            color: #fff; /* Adjust the color for better contrast on dark background */
         }}
         .metric-value {{
-            font-size: calc({font_size} * 1.5);
+            font-size: {int(font_size * 1.25)}px; /* Use int() to ensure whole numbers */
             margin-bottom: 0.75rem;
+            color: #fff; /* Adjust the color for better contrast on dark background */
         }}
         .metric-link {{
-            font-size: calc({font_size} * 1.5);
+            font-size: {int(font_size * 1.25)}px; /* Use int() to ensure whole numbers */
             margin-bottom: 0.75rem;
         }}
         .metric-link a {{
@@ -94,23 +101,23 @@ def display_run_details(font_size='14px'):
     st.markdown(custom_css, unsafe_allow_html=True)
 
     st.markdown(f"""
-        <div class="metric-label">Run ID</div>
-        <div class="metric-value">{this.run_id}</div>
-        <div class="metric-label">Run Name</div>
-        <div class="metric-link"><a href="{this.run_url}" target="_blank">{this.run_name}</a></div>
-        <div class="metric-label">Build Name</div>
-        <div class="metric-link"><a href="{this.build_url}" target="_blank">{this.build_name}</a></div>
-        <div class="metric-label">State</div>
-        <div class="metric-value">{this.state}</div>
-        <div class="metric-label">Start Date</div>
-        <div class="metric-value">{this.start_date}</div>
-        <div class="metric-label">End Date</div>
-        <div class="metric-value">{this.end_date}</div>
-        <div class="metric-label">Release Stage</div>
-        <div class="metric-link"><a href="{this.release_stage}" target="_blank">{this.release_stage}</a></div>
+        <div class="metric-container">
+            <div class="metric-label">Run ID</div>
+            <div class="metric-value">{this.run_id}</div>
+            <div class="metric-label">Run Name</div>
+            <div class="metric-link"><a href="{this.run_url}" target="_blank">{this.run_name}</a></div>
+            <div class="metric-label">Build Name</div>
+            <div class="metric-link"><a href="{this.build_url}" target="_blank">{this.build_name}</a></div>
+            <div class="metric-label">State</div>
+            <div class="metric-value">{this.state}</div>
+            <div class="metric-label">Start Date</div>
+            <div class="metric-value">{this.start_date}</div>
+            <div class="metric-label">End Date</div>
+            <div class="metric-value">{this.end_date}</div>
+            <div class="metric-label">Release Stage</div>
+            <div class="metric-link"><a href="{this.release_stage}" target="_blank">{this.release_stage}</a></div>
+        </div>
     """, unsafe_allow_html=True)
-
-
 
 
 def analyze_and_plot():
@@ -193,7 +200,7 @@ def analyze_and_plot():
         with col1:
             display_run_details()
         with col2:
-            st_echarts(option_pie, height="650px")
+            st_echarts(option_pie, height="600px")
 
 
     for class_label, keywords in keyword_counts.items():
@@ -246,9 +253,9 @@ def analyze_and_plot():
             }
             st_echarts(options=option_bar, key=class_label, height="500px")
 
-    if unclassified_errors:
+    if this.unclassified_errors:
         st.subheader("Unclassified Errors:")
-        for error in unclassified_errors:
+        for error in this.unclassified_errors:
             st.text(error)
 
 with cols[0]:
