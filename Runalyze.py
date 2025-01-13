@@ -51,7 +51,7 @@ def classify_error_message(error_message):
 def fetch_run_results(run_id):
     url = f"https://dev.azure.com/MDTProductDevelopment/carelink/_apis/test/Runs/{run_id}/results?api-version=5.0"
     headers = {
-        'Authorization': f'Bearer {"3xdeeY8sHgnb7aBV26Fcrj8yNogN7MWv1bFagtzUih7MBpCdiOYYJQQJ99BAACAAAAA4nb4XAAASAZDOXTze"}',  
+        'Authorization': f'Bearer {""}',  
     }
     
     response = requests.get(url, headers=headers, verify=False)  
@@ -66,7 +66,7 @@ def fetch_run_results(run_id):
 def fetch_test_run_summary(run_id):
     url = f"https://dev.azure.com/MDTProductDevelopment/carelink/_apis/test/Runs/{run_id}?api-version=5.0"
     headers = {
-        'Authorization': f'Bearer {"3xdeeY8sHgnb7aBV26Fcrj8yNogN7MWv1bFagtzUih7MBpCdiOYYJQQJ99BAACAAAAA4nb4XAAASAZDOXTze"}',
+        'Authorization': f'Bearer {""}',
     }
     response = requests.get(url, headers=headers, verify=False)
     if response.status_code == 200:
