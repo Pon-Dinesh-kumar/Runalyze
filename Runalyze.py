@@ -75,24 +75,24 @@ def display_run_details():
             background-color: rgba(50, 50, 50, 0.7);
             border-radius: 10px;
             padding: 10px;
-            margin-bottom: 10px; /* Added for some space between the boxes */
+            margin-bottom: 10px;
         }}
         .metric-label {{
             font-size: {font_size}px;
             font-weight: 200;
-            color: #fff; /* Adjust the color for better contrast on dark background */
+            color: #A9A9A9;
         }}
         .metric-value {{
-            font-size: {int(font_size * 1.25)}px; /* Use int() to ensure whole numbers */
+            font-size: {int(font_size * 1.25)}px;
             margin-bottom: 0.75rem;
-            color: #fff; /* Adjust the color for better contrast on dark background */
+            color: #fff;
         }}
         .metric-link {{
-            font-size: {int(font_size * 1.25)}px; /* Use int() to ensure whole numbers */
+            font-size: {int(font_size * 1.25)}px;
             margin-bottom: 0.75rem;
         }}
         .metric-link a {{
-            color: #007bff; /* Bootstrap default blue */
+            color: #007bff;
             text-decoration: underline;
         }}
     </style>
