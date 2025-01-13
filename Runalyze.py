@@ -105,13 +105,13 @@ def display_metrics(run_id):
     if not summary:
         return
     with cols[4]:
-        st.metric("Total Tests", f"{summary['total']}")
+        st.metric("Total Tests", f"{summary['total']}", border=True)
     with cols[5]:
-        st.metric("Passed Tests", f"{summary['passed']}")
+        st.metric("Passed Tests", f"{summary['passed']}", border=True)
     with cols[6]:
-        st.metric("Failed Tests", f"{summary['failed']}")
+        st.metric("Failed Tests", f"{summary['failed']}", border=True)
     with cols[7]:
-        st.metric("Aborted Tests", f"{summary['aborted']}")
+        st.metric("Aborted Tests", f"{summary['aborted']}", border=True)
 
 
 def analyze_and_plot(run_id):
