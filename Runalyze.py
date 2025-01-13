@@ -1,6 +1,11 @@
+import os
+
 import streamlit as st
-import requests
 from streamlit_echarts import st_echarts
+import requests
+from dotenv import load_dotenv
+
+load_dotenv('access.env')
 
 
 st.set_page_config(layout="wide")
@@ -50,8 +55,9 @@ def classify_error_message(error_message):
 
 def fetch_run_results(run_id):
     url = f"https://dev.azure.com/MDTProductDevelopment/carelink/_apis/test/Runs/{run_id}/results?api-version=5.0"
+    access_token = os.getenv('ACCESS_TOKEN')
     headers = {
-        'Authorization': f'Bearer {""}',  
+        'Authorization': f'Bearer {access_token}',
     }
     
     response = requests.get(url, headers=headers, verify=False)  
@@ -65,17 +71,31 @@ def fetch_run_results(run_id):
 
 def fetch_test_run_summary(run_id):
     url = f"https://dev.azure.com/MDTProductDevelopment/carelink/_apis/test/Runs/{run_id}?api-version=5.0"
+    access_token = os.getenv('ACCESS_TOKEN')  # Make sure this matches the name in your .env file
     headers = {
-        'Authorization': f'Bearer {""}',
+        'Authorization': f'Bearer {access_token}',
     }
     response = requests.get(url, headers=headers, verify=False)
     if response.status_code == 200:
         summary = response.json()
+        run_statistics = summary.get("runStatistics", [])
+
+        # Initialize counts
+        failed_count = 0
+        aborted_count = 0
+
+        # Extract counts for failed and aborted (none) outcomes
+        for stat in run_statistics:
+            if stat.get("outcome") == "Failed":
+                failed_count = stat.get("count", 0)
+            elif stat.get("outcome") == "None":
+                aborted_count = stat.get("count", 0)
+
         return {
             "total": summary.get("totalTests", 0),
             "passed": summary.get("passedTests", 0),
-            "failed": summary.get("runStatistics", [{}])[2].get("count", 0), 
-            "aborted": summary.get("unanalyzedTests", 0) - summary.get("runStatistics", [{}])[2].get("count", 0)
+            "failed": failed_count,
+            "aborted": aborted_count
         }
     else:
         st.error(f"Failed to retrieve summary for run ID {run_id}. Status Code: {response.status_code}")
