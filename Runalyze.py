@@ -71,7 +71,7 @@ def fetch_run_results(run_id):
 
 def fetch_test_run_summary(run_id):
     url = f"https://dev.azure.com/MDTProductDevelopment/carelink/_apis/test/Runs/{run_id}?api-version=5.0"
-    access_token = os.getenv('ACCESS_TOKEN')  # Make sure this matches the name in your .env file
+    access_token = os.getenv('ACCESS_TOKEN')
     headers = {
         'Authorization': f'Bearer {access_token}',
     }
@@ -84,7 +84,6 @@ def fetch_test_run_summary(run_id):
         failed_count = 0
         aborted_count = 0
 
-        # Extract counts for failed and aborted (none) outcomes
         for stat in run_statistics:
             if stat.get("outcome") == "Failed":
                 failed_count = stat.get("count", 0)
@@ -105,11 +104,11 @@ def display_metrics(run_id):
     summary = fetch_test_run_summary(run_id)
     if not summary:
         return
-    with cols[1]:
+    with cols[4]:
         st.metric("Total Tests", f"{summary['total']}")
-    with cols[3]:
-        st.metric("Passed Tests", f"{summary['passed']}")
     with cols[5]:
+        st.metric("Passed Tests", f"{summary['passed']}")
+    with cols[6]:
         st.metric("Failed Tests", f"{summary['failed']}")
     with cols[7]:
         st.metric("Aborted Tests", f"{summary['aborted']}")
@@ -152,20 +151,20 @@ def analyze_and_plot(run_id):
          
         "legend": {
              "orient": "vertical",
-             "left": "left",
+             "left": "right",
              "textStyle": {
                     "color": "#FFFFFF",
-                    "fontSize": 12     
+                    "fontSize": 10
                 },
-             "backgroundColor": "rgba(50, 50, 50, 0.7)", 
-             "borderRadius": 5, 
-             "padding": [10, 15, 10, 15] 
+             "backgroundColor": "rgba(50, 50, 50, 0.7)",
+             "borderRadius": 5,
+             "padding": [10, 10, 10, 10]
         },
         "series": [
             {
                 "name": "Error Classification",
                 "type": "pie",
-                "radius": "60%",
+                "radius": "50%",
                 "data": chart_data,
                 "label": {
                 "normal": {
@@ -188,7 +187,7 @@ def analyze_and_plot(run_id):
     pie_chart_container = st.container()
     with pie_chart_container:
         # Define the columns within the container
-        col1, col2, col3 = st.columns([1, 2, 4])
+        col1, col2, col3 = st.columns([1, 1, 3])
         # Merge the middle columns for the pie chart
         with col1:
             pass  # This could also be an empty placeholder or pass
