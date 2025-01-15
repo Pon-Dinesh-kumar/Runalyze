@@ -52,3 +52,9 @@ failed = 0
 aborted = 0
 
 unclassified_errors = []
+
+
+classification_counts = {}
+keyword_counts = {}
+failed_test_cases = []
+chart_data = []

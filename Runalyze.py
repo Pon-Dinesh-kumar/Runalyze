@@ -4,11 +4,11 @@ from streamlit_echarts import st_echarts
 import requests
 from dotenv import load_dotenv
 import this
+import json
 
-st.set_page_config(layout="wide")
-load_dotenv('access.env')
-st.title("Azure DevOps Test Run Analysis")
-cols = st.columns(8)
+
+
+
 
 def initialize(run_id):
     #GETTING RUN RESULT
@@ -56,14 +56,6 @@ def custom_metric(label, value, color, font_size="16px"):
         <h1 style="color:{color}; font-size:calc({font_size} * 2); margin:0; line-height:1.2; padding: 0;">{value}</h1>
     </div>
     """
-
-def classify_error_message(error_message):
-    for class_label, keywords in this.class_keywords.items():
-        if any(keyword in error_message for keyword in keywords):
-            return class_label
-    this.unclassified_errors.append(error_message)
-    return "Unclassified"
-
 
 def display_run_details():
     font_size = 14
@@ -119,33 +111,46 @@ def display_run_details():
     """, unsafe_allow_html=True)
 
 
-def analyze_and_plot():
+def classify_error_message(error_message):
+    for class_label, keywords in this.class_keywords.items():
+        if any(keyword in error_message for keyword in keywords):
+            return class_label
+    this.unclassified_errors.append(error_message)
+    return "Unclassified"
 
-    with cols[4]:
-        st.markdown(custom_metric("Total Tests", this.total, "grey", "14px"), unsafe_allow_html=True)
-    with cols[5]:
-        st.markdown(custom_metric("Passed Tests", this.passed, "green", "14px"), unsafe_allow_html=True)
-    with cols[6]:
-        st.markdown(custom_metric("Failed Tests", this.failed, "red", "14px"), unsafe_allow_html=True)
-    with cols[7]:
-        st.markdown(custom_metric("Aborted Tests", this.aborted, "orange", "14px"), unsafe_allow_html=True)
 
-    classification_counts = {key: 0 for key in this.class_keywords.keys()}
-    classification_counts["Unclassified"] = 0
-    keyword_counts = {key: {kw: 0 for kw in keywords} for key, keywords in this.class_keywords.items()}
+def analyze_results():
+    this.classification_counts = {key: 0 for key in this.class_keywords.keys()}
+    this.classification_counts["Unclassified"] = 0
+    this.keyword_counts = {key: {kw: 0 for kw in keywords} for key, keywords in this.class_keywords.items()}
 
     for result in this.run_result.get('value', []):
         outcome = result.get('outcome', None)
         if outcome == "Failed":
             error_message = result.get('errorMessage', '')
             class_label = classify_error_message(error_message)
-            classification_counts[class_label] += 1
+            this.classification_counts[class_label] += 1
+            exception_keyword = next((keyword for keyword in this.class_keywords[class_label] if keyword in error_message), None)
+            this.failed_test_cases.append({
+                "ID": result["id"],
+                "TESTCASE_ID": result["testCase"]["id"],
+                "TESTCASE_NAME": result["testCase"]["name"],
+                "DURATION_IN_MINUTES": round(result["durationInMs"] / 60000, 2),
+                "EXCEPTION/ERROR": exception_keyword or "None",
+                "CLASS_LABEL": class_label or "None",
+                "PRIORITY": result["priority"],
+                "URL": result["url"]
+            })
 
-            for keyword in keyword_counts.get(class_label, {}):
-                if keyword in error_message:
-                    keyword_counts[class_label][keyword] += 1
+            if exception_keyword:
+                this.keyword_counts[class_label][exception_keyword] += 1
 
-    chart_data = [{"value": count, "name": f"{label} ({count})"} for label, count in classification_counts.items()]
+    this.chart_data = [{"value": count, "name": f"{label} ({count})"} for label, count in this.classification_counts.items()]
+    with open('failed_test_cases.json', 'w') as f:
+        json.dump(this.failed_test_cases, f)
+
+
+def plot_pie_chart_and_run_details():
 
     option_pie = {
         "title": {
@@ -174,7 +179,7 @@ def analyze_and_plot():
                 "name": "Error Classification",
                 "type": "pie",
                 "radius": "50%",
-                "data": chart_data,
+                "data": this.chart_data,
                 "label": {
                     "normal": {
                         "textStyle": {
@@ -201,7 +206,8 @@ def analyze_and_plot():
         with col2:
             st_echarts(option_pie, height="600px")
 
-    for class_label, keywords in keyword_counts.items():
+def plot_bar_charts():
+    for class_label, keywords in this.keyword_counts.items():
         if any(keywords.values()):
             with st.expander(class_label, expanded=True):
                 chart_data_bar = [{"value": count, "name": kw} for kw, count in keywords.items()]
@@ -252,13 +258,36 @@ def analyze_and_plot():
                 }
                 st_echarts(options=option_bar, key=class_label, height="500px")
 
+
+def show_unclassified_errors():
     if this.unclassified_errors:
         st.subheader("Unclassified Errors:")
         for error in this.unclassified_errors:
             st.text(error)
 
+
+def display_metrics():
+    with cols[4]:
+        st.markdown(custom_metric("Total Tests", this.total, "grey", "12px"), unsafe_allow_html=True)
+    with cols[5]:
+        st.markdown(custom_metric("Passed Tests", this.passed, "green", "12px"), unsafe_allow_html=True)
+    with cols[6]:
+        st.markdown(custom_metric("Failed Tests", this.failed, "red", "12px"), unsafe_allow_html=True)
+    with cols[7]:
+        st.markdown(custom_metric("Aborted Tests", this.aborted, "orange", "12px"), unsafe_allow_html=True)
+
+st.set_page_config(layout="wide")
+load_dotenv('access.env')
+st.title("Azure DevOps Test Run Analysis")
+
+cols = st.columns(8)
 with cols[0]:
     this.run_id = st.text_input("Enter the run ID:")
 if st.button("Analyze"):
     initialize(this.run_id)
-    analyze_and_plot()
+    analyze_results()
+    display_metrics()
+    plot_pie_chart_and_run_details()
+    plot_bar_charts()
+    show_unclassified_errors()
+
