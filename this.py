@@ -17,14 +17,16 @@ class_keywords = {
         "PDF generation failed", "No emails matching the search were found", "No clinic with key 0 exists",
         "Patient is not displayed on Patient Assignment page", "InstrumentCommandsResponse is null", "Transmission not found", "HeartFailureManagementLink does not exists",
         "No Archived Transmissions are displayed on the Transmissions List Page", "Tranmission with iTransmissionId", "Transmission not found",
-        "Unable to retrieve EarliestAppointmentDate for patient", "Patient with DSN"
+        "Unable to retrieve EarliestAppointmentDate for patient", "Patient with DSN", "Report Generation Status Message is not displayed",
+        "Patient 0 not enrolled as expected"
     ],
     "Assert Failed": [
         "Assert.IsTrue", "Assert.Fail", "Assert.AreEqual", "Assert.IsNotNull", "Assert.IsFalse", "StringAssert.Contains",
         "CollectionAssert.AreEquivalent", "Assert.Inconclusive"
     ],
     "Data Setup API Error": [
-        "Data Setup API error InternalServerError (500)", "Data Setup API error Unauthorized (401)", "Data Setup API error NotFound (404)", "DataSetupService timedout"
+        "Data Setup API error InternalServerError (500)", "Data Setup API error Unauthorized (401)",
+        "Data Setup API error NotFound (404)", "Data Setup API error ServiceUnavailable (503)", "DataSetupService timedout"
     ],
     "Carelink API Error": [
         "Carelink API error"

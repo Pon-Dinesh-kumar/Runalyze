@@ -10,7 +10,6 @@ load_dotenv('access.env')
 st.title("Azure DevOps Test Run Analysis")
 cols = st.columns(8)
 
-
 def initialize(run_id):
     #GETTING RUN RESULT
     url = f"https://dev.azure.com/MDTProductDevelopment/carelink/_apis/test/Runs/{run_id}/results?api-version=5.0"
@@ -202,56 +201,56 @@ def analyze_and_plot():
         with col2:
             st_echarts(option_pie, height="600px")
 
-
     for class_label, keywords in keyword_counts.items():
         if any(keywords.values()):
-            chart_data_bar = [{"value": count, "name": kw} for kw, count in keywords.items()]
-            option_bar = {
-                "title": {
-                    "text": f"Keyword Distribution for {class_label}",
-                    "left": "center",
-                    "textStyle": {"color": "#FFFFFF", "fontWeight": "bold"}
-                },
-                "tooltip": {
-                    "trigger": "axis",
-                    "axisPointer": {
-                        "type": "shadow"
-                    }
-                },
-                "grid": {
-                    "left": "10%",
-                    "right": "10%",
-                    "bottom": "10%",
-                    "containLabel": True
-                },
-                "xAxis": {
-                    "type": "value",
-                    "axisLabel": {"color": "#FFFFFF", "fontWeight": "bold"}
-                },
-                "yAxis": {
-                    "type": "category",
-                    "data": list(keywords.keys()),
-                    "axisLabel": {
-                        "color": "#FFFFFF",
-                        "fontWeight": "bold",
-                        "interval": 0,
-                    }
-                },
-                "series": [
-                    {
-                        "data": chart_data_bar,
-                        "type": "bar",
-                        "itemStyle": {"color": "#61A0A8"},
-                        "label": {
-                            "show": True,
-                            "position": "right",
-                            "color": "#FFFFFF",
-                            "fontWeight": "bold"
+            with st.expander(class_label, expanded=True):
+                chart_data_bar = [{"value": count, "name": kw} for kw, count in keywords.items()]
+                option_bar = {
+                    "title": {
+                        "text": f"Keyword Distribution for {class_label}",
+                        "left": "center",
+                        "textStyle": {"color": "#FFFFFF", "fontWeight": "bold"}
+                    },
+                    "tooltip": {
+                        "trigger": "axis",
+                        "axisPointer": {
+                            "type": "shadow"
                         }
-                    }
-                ]
-            }
-            st_echarts(options=option_bar, key=class_label, height="500px")
+                    },
+                    "grid": {
+                        "left": "10%",
+                        "right": "10%",
+                        "bottom": "10%",
+                        "containLabel": True
+                    },
+                    "xAxis": {
+                        "type": "value",
+                        "axisLabel": {"color": "#FFFFFF", "fontWeight": "bold"}
+                    },
+                    "yAxis": {
+                        "type": "category",
+                        "data": list(keywords.keys()),
+                        "axisLabel": {
+                            "color": "#FFFFFF",
+                            "fontWeight": "bold",
+                            "interval": 0,
+                        }
+                    },
+                    "series": [
+                        {
+                            "data": chart_data_bar,
+                            "type": "bar",
+                            "itemStyle": {"color": "#61A0A8"},
+                            "label": {
+                                "show": True,
+                                "position": "right",
+                                "color": "#FFFFFF",
+                                "fontWeight": "bold"
+                            }
+                        }
+                    ]
+                }
+                st_echarts(options=option_bar, key=class_label, height="500px")
 
     if this.unclassified_errors:
         st.subheader("Unclassified Errors:")
